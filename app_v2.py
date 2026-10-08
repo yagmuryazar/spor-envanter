@@ -6,17 +6,32 @@ from datetime import date
 # ==========================================
 # GİRİŞ ŞİFRESİ VE OTURUM KONTROLÜ
 # ==========================================
-DOGRU_SIFRE = "Sks1907"  # Belirlediğin güncel şifre
+DOGRU_SIFRE = "Sks1907"
 
 st.set_page_config(
-    page_title="FBÜ SKS | Spor Malzemeleri ve Zimmet Portalı", 
-    page_icon="🏛️", 
-    layout="wide"
+    page_title="FBÜ SKS | Spor Malzemeleri ve Zimmet Portalı",
+    page_icon="🏛️",
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
-# Editorial Bej & Vişne CSS Stilleri
+# Editorial Bej & Vişne CSS Stilleri + Fork / GitHub / Toolbar Gizleme
 st.markdown("""
 <style>
+    /* SAĞ ÜSTTEKİ FORK, GITHUB, HEADER VE MENÜLERİ TAMAMEN YOK EDER */
+    #MainMenu {visibility: hidden !important; display: none !important;}
+    header {visibility: hidden !important; display: none !important;}
+    footer {visibility: hidden !important; display: none !important;}
+    [data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
+    [data-testid="stToolbarActions"] {visibility: hidden !important; display: none !important;}
+    [data-testid="stDecoration"] {visibility: hidden !important; display: none !important;}
+    [data-testid="stStatusWidget"] {visibility: hidden !important; display: none !important;}
+    .stAppDeployButton {visibility: hidden !important; display: none !important;}
+    .viewerBadge_container__1QSob {display: none !important;}
+    .viewerBadge_link__1S137 {display: none !important;}
+    #manage-app-button {display: none !important;}
+
+    /* SAYFA ARKA PLANI VE GENEL RENKLER */
     .stApp {
         background-color: #F9F6F0 !important;
         color: #2D2424 !important;
@@ -139,13 +154,6 @@ st.markdown("""
 if "giris_yetkisi" not in st.session_state:
     st.session_state.giris_yetkisi = False
 
-def sifre_kontrol():
-    if st.session_state.parola_input == DOGRU_SIFRE:
-        st.session_state.giris_yetkisi = True
-    else:
-        st.error("Hatalı parola! Lütfen tekrar deneyin.")
-
-# Kullanıcı giriş yapmadıysa resmi kurumsal giriş kutusu görünür
 if not st.session_state.giris_yetkisi:
     st.markdown("<br><br>", unsafe_allow_html=True)
     c1, c2, c3 = st.columns([1, 1.2, 1])
@@ -159,10 +167,14 @@ if not st.session_state.giris_yetkisi:
             </div>
         """, unsafe_allow_html=True)
         st.write("")
-        st.text_input("Giriş Parolası:", type="password", key="parola_input", on_change=sifre_kontrol, placeholder="Parolanızı yazın...")
+        girilen_parola = st.text_input("Giriş Parolası:", type="password", placeholder="Parolanızı yazın...")
         if st.button("Giriş Yap", type="primary", use_container_width=True):
-            sifre_kontrol()
-    st.stop()  # Parola doğrulanana kadar aşağıdaki kodları asla çalıştırmaz
+            if girilen_parola.strip() == DOGRU_SIFRE:
+                st.session_state.giris_yetkisi = True
+                st.rerun()
+            else:
+                st.error("Hatalı parola! Lütfen tekrar deneyin.")
+    st.stop()
 
 # ==========================================
 # VERİTABANI BAĞLANTISI VE TABLO KURULUMU
@@ -274,9 +286,9 @@ st.write("")
 
 # Sekmeler
 tab1, tab2, tab3, tab4 = st.tabs([
-    "Envanter Özeti", 
-    "Sporcu Zimmet", 
-    "Kuru Temizleme", 
+    "Envanter Özeti",
+    "Sporcu Zimmet",
+    "Kuru Temizleme",
     "Koleksiyon Yönetimi"
 ])
 
@@ -291,18 +303,16 @@ with tab1:
 
     if not envanter_df.empty:
         pivot_depo = pd.pivot_table(
-            envanter_df, 
-            values='depoda', 
-            index=['urun_adi'], 
-            columns=['beden'], 
-            aggfunc='sum', 
+            envanter_df,
+            values='depoda',
+            index=['urun_adi'],
+            columns=['beden'],
+            aggfunc='sum',
             fill_value=0
         )
-        
         mevcut_bedenler = [b for b in BEDEN_SIRASI if b in pivot_depo.columns]
         diger_bedenler = [b for b in pivot_depo.columns if b not in BEDEN_SIRASI]
         pivot_depo = pivot_depo[mevcut_bedenler + diger_bedenler]
-        
         ozet_genel = envanter_df.groupby('urun_adi').agg({
             'depoda': 'sum',
             'zimmette': 'sum',
@@ -325,8 +335,7 @@ with tab1:
             urun_filtre = envanter_df[envanter_df['urun_adi'] == urun]
             toplam_sayi = urun_filtre['toplam_adet'].sum()
             depo_sayi = urun_filtre['depoda'].sum()
-            
-            with st.expander(f"{urun}  —  [Hazır: {depo_sayi} | Toplam: {toplam_sayi} Adet]"):
+            with st.expander(f"{urun} — [Hazır: {depo_sayi} | Toplam: {toplam_sayi} Adet]"):
                 detay_df = urun_filtre[['beden', 'depoda', 'zimmette', 'temizlemede', 'toplam_adet']].rename(columns={
                     'beden': 'Beden',
                     'depoda': 'Depoda Hazır',
@@ -341,7 +350,7 @@ with tab1:
     st.divider()
     st.subheader("Aktif Sporcu Zimmetleri")
     aktif_zimmet_df = pd.read_sql("""
-        SELECT 
+        SELECT
             sporcu_adi as [Sporcu],
             forma_no as [Forma No],
             urun_adi as [Ürün],
@@ -349,11 +358,10 @@ with tab1:
             adet as [Adet],
             verilis_tarihi as [Veriliş Tarihi],
             notlar as [Açıklama]
-        FROM zimmet_kayitlari 
+        FROM zimmet_kayitlari
         WHERE durum = 'Zimmetli'
         ORDER BY sporcu_adi ASC
     """, conn)
-    
     if not aktif_zimmet_df.empty:
         st.dataframe(aktif_zimmet_df, use_container_width=True)
     else:
@@ -371,7 +379,7 @@ with tab2:
 
         if not hazir_urunler.empty:
             secenekler_z = {
-                f"{r['urun_adi']} [{r['beden']}] — (Hazır: {r['depoda']} adet)": r['id'] 
+                f"{r['urun_adi']} [{r['beden']}] — (Hazır: {r['depoda']} adet)": r['id']
                 for _, r in hazir_urunler.iterrows()
             }
             secilen_z_label = st.selectbox("Teslim Edilecek Parça:", list(secenekler_z.keys()), key="zimmet_secim")
@@ -438,22 +446,19 @@ with tab3:
     with col1:
         st.subheader("Kuru Temizlemeye Gönder")
         urunler = pd.read_sql("SELECT id, urun_adi, beden, depoda FROM envanter WHERE depoda > 0", conn)
-        
         if not urunler.empty:
             secenekler = {f"{row['urun_adi']} [{row['beden']}] — Depo: {row['depoda']}": row['id'] for _, row in urunler.iterrows()}
             secilen = st.selectbox("Gönderilecek Malzeme:", list(secenekler.keys()), key="temizleme_urun_secimi")
             secilen_id = secenekler[secilen]
             max_adet = int(urunler[urunler['id'] == secilen_id]['depoda'].values[0])
-            
             adet = st.number_input("Adet:", min_value=1, max_value=max_adet, step=1, key="kt_adet")
             not_bilgisi = st.text_input("Kuru Temizleme Firması / Açıklama:", key="kt_not")
-            
             if st.button("Temizlemeye Gönder", type="primary", use_container_width=True):
                 c.execute("UPDATE envanter SET depoda = depoda - ?, temizlemede = temizlemede + ? WHERE id = ?", (adet, adet, secilen_id))
                 secilen_row = urunler[urunler['id'] == secilen_id].iloc[0]
                 c.execute("""
-                INSERT INTO temizleme_kayitlari (urun_id, urun_adi, beden, adet, gidis_tarihi, durum, notlar)
-                VALUES (?, ?, ?, ?, ?, 'Temizlemede', ?)
+                    INSERT INTO temizleme_kayitlari (urun_id, urun_adi, beden, adet, gidis_tarihi, durum, notlar)
+                    VALUES (?, ?, ?, ?, ?, 'Temizlemede', ?)
                 """, (secilen_id, secilen_row['urun_adi'], secilen_row['beden'], adet, str(date.today()), not_bilgisi))
                 conn.commit()
                 st.success("Kuru temizlemeye gönderildi.")
@@ -464,7 +469,6 @@ with tab3:
     with col2:
         st.subheader("Temizlemeden Geri Teslim Al")
         aktif_temizleme = pd.read_sql("SELECT * FROM temizleme_kayitlari WHERE durum = 'Temizlemede'", conn)
-        
         if not aktif_temizleme.empty:
             for _, row in aktif_temizleme.iterrows():
                 with st.expander(f"{row['urun_adi']} [{row['beden']}] — {row['adet']} Adet"):
@@ -487,17 +491,15 @@ with tab4:
     with col_ekle:
         st.subheader("Yeni Koleksiyon Ekle")
         st.caption("Tek seferde tüm beden adetlerini tanımlayabilirsiniz.")
-        
         urun_adi_input = st.text_input("Parça Başlığı (örn: Maç Forması, Antrenman Sweat, Eşofman Altı):")
-        
         st.write("**Beden Adetleri:**")
         c1, c2, c3, c4 = st.columns(4)
         with c1:
             adet_xs = st.number_input("XS:", min_value=0, step=1, value=0)
-            adet_s  = st.number_input("S:", min_value=0, step=1, value=0)
+            adet_s = st.number_input("S:", min_value=0, step=1, value=0)
         with c2:
-            adet_m  = st.number_input("M:", min_value=0, step=1, value=0)
-            adet_l  = st.number_input("L:", min_value=0, step=1, value=0)
+            adet_m = st.number_input("M:", min_value=0, step=1, value=0)
+            adet_l = st.number_input("L:", min_value=0, step=1, value=0)
         with c3:
             adet_xl = st.number_input("XL:", min_value=0, step=1, value=0)
             adet_2xl = st.number_input("2XL:", min_value=0, step=1, value=0)
@@ -508,7 +510,7 @@ with tab4:
         if st.button("Koleksiyonu Kaydet", type="primary", use_container_width=True):
             if urun_adi_input.strip():
                 bedenler = {
-                    "XS": adet_xs, "S": adet_s, "M": adet_m, 
+                    "XS": adet_xs, "S": adet_s, "M": adet_m,
                     "L": adet_l, "XL": adet_xl, "2XL": adet_2xl,
                     "3XL": adet_3xl, "4XL": adet_4xl
                 }
@@ -516,11 +518,10 @@ with tab4:
                 for b_ad, b_adet in bedenler.items():
                     if b_adet > 0:
                         c.execute("""
-                            INSERT INTO envanter (urun_adi, beden, toplam_adet, depoda, temizlemede, zimmette) 
+                            INSERT INTO envanter (urun_adi, beden, toplam_adet, depoda, temizlemede, zimmette)
                             VALUES (?, ?, ?, ?, 0, 0)
                         """, (urun_adi_input.strip(), b_ad, b_adet, b_adet))
                         eklenen_var_mi = True
-                
                 if eklenen_var_mi:
                     conn.commit()
                     st.success(f"'{urun_adi_input}' başarıyla eklendi!")
@@ -536,7 +537,6 @@ with tab4:
 
         if not mevcut_urunler.empty:
             sil_urun = st.selectbox("Silinecek Parça:", mevcut_urunler['urun_adi'].tolist())
-            
             st.warning(f"**{sil_urun}** adlı parça tüm bedenleriyle birlikte silinecektir.")
             if st.button(f"'{sil_urun}' Parçasını Sil", type="primary", use_container_width=True):
                 c.execute("SELECT id FROM envanter WHERE urun_adi = ?", (sil_urun,))
@@ -563,10 +563,10 @@ st.markdown("<br><br>", unsafe_allow_html=True)
 st.markdown(
     """
     <div style="
-        border-top: 1.5px solid #E6DCD2; 
-        margin-top: 60px; 
-        padding-top: 25px; 
-        padding-bottom: 25px; 
+        border-top: 1.5px solid #E6DCD2;
+        margin-top: 60px;
+        padding-top: 25px;
+        padding-bottom: 25px;
         text-align: center;
     ">
         <p style="margin: 0; color: #630C16; font-size: 0.95rem; font-family: 'Playfair Display', Georgia, serif; letter-spacing: 0.04em;">
