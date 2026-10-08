@@ -6,9 +6,13 @@ from datetime import date
 # ==========================================
 # GİRİŞ ŞİFRESİ VE OTURUM KONTROLÜ
 # ==========================================
-DOGRU_SIFRE = "Sks2026"  # Arkadaşlarınla paylaşacağın ortak şifre
+DOGRU_SIFRE = "Sks2026"  # Belirlediğin güncel şifre
 
-st.set_page_config(page_title="Cherry Studio | Envanter Portalı", page_icon="🍒", layout="wide")
+st.set_page_config(
+    page_title="FBÜ SKS | Spor Malzemeleri ve Zimmet Portalı", 
+    page_icon="🏛️", 
+    layout="wide"
+)
 
 # Editorial Bej & Vişne CSS Stilleri
 st.markdown("""
@@ -141,16 +145,17 @@ def sifre_kontrol():
     else:
         st.error("Hatalı parola! Lütfen tekrar deneyin.")
 
-# Kullanıcı giriş yapmadıysa sadece bu zarif kutu görünür
+# Kullanıcı giriş yapmadıysa resmi kurumsal giriş kutusu görünür
 if not st.session_state.giris_yetkisi:
     st.markdown("<br><br>", unsafe_allow_html=True)
     c1, c2, c3 = st.columns([1, 1.2, 1])
     with c2:
         st.markdown("""
             <div style="background: #FFFFFF; border: 1.5px solid #E6DCD2; border-radius: 18px; padding: 32px 28px; text-align: center; box-shadow: 0 10px 25px rgba(99, 12, 22, 0.04);">
-                <span style="font-size: 2rem;">🍒</span>
-                <h2 style="font-family: 'Playfair Display', Georgia, serif; color: #630C16; margin: 10px 0 6px 0;">Atelier Sports Club</h2>
-                <p style="color: #8C7872; font-size: 0.88rem; margin-bottom: 22px;">Koleksiyon, zimmet ve kuru temizleme paneline erişim için parolayı giriniz.</p>
+                <span style="font-size: 2.2rem;">🏛️</span>
+                <h2 style="font-family: 'Playfair Display', Georgia, serif; color: #630C16; margin: 10px 0 4px 0;">Fenerbahçe Üniversitesi</h2>
+                <h4 style="color: #630C16; margin: 0 0 10px 0; font-weight: 500; font-size: 1.05rem;">Sağlık, Kültür ve Spor Daire Başkanlığı</h4>
+                <p style="color: #8C7872; font-size: 0.88rem; margin-bottom: 22px;">Spor Malzemeleri ve Zimmet Takip Portalı</p>
             </div>
         """, unsafe_allow_html=True)
         st.write("")
@@ -214,8 +219,8 @@ with header_col1:
     st.markdown("""
     <div class="editorial-header">
         <div>
-            <h1 class="editorial-title">Atelier Sports Club</h1>
-            <p style="margin: 4px 0 0 0; color: #8A7670; font-size: 0.95rem;">Takım Gardırobu, Zimmet & Bakım Koleksiyonu</p>
+            <h1 class="editorial-title">Spor Malzemeleri ve Zimmet Portalı</h1>
+            <p style="margin: 4px 0 0 0; color: #8A7670; font-size: 0.95rem;">Fenerbahçe Üniversitesi Sağlık, Kültür ve Spor Daire Başkanlığı • Spor Birimi</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -483,7 +488,7 @@ with tab4:
         st.subheader("Yeni Koleksiyon Ekle")
         st.caption("Tek seferde tüm beden adetlerini tanımlayabilirsiniz.")
         
-        urun_adi_input = st.text_input("Parça Başlığı (örn: Krem Antrenman Sweat, Bordeaux Maç Forması):")
+        urun_adi_input = st.text_input("Parça Başlığı (örn: Maç Forması, Antrenman Sweat, Eşofman Altı):")
         
         st.write("**Beden Adetleri:**")
         c1, c2, c3, c4 = st.columns(4)
@@ -568,7 +573,7 @@ st.markdown(
             Designed & Developed by <b>Yağmur Ece Yazar</b>
         </p>
         <p style="margin: 4px 0 0 0; color: #8A7670; font-size: 0.78rem; letter-spacing: 0.05em; text-transform: uppercase;">
-            Cherry Creative Studio Archive © 2026
+            FBÜ Sağlık, Kültür ve Spor Daire Başkanlığı © 2026
         </p>
     </div>
     """,
