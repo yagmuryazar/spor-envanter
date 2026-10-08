@@ -6,7 +6,7 @@ from datetime import date
 # ==========================================
 # GİRİŞ ŞİFRESİ VE OTURUM KONTROLÜ
 # ==========================================
-DOGRU_SIFRE = "Sks2026"  # Belirlediğin güncel şifre
+DOGRU_SIFRE = "Sks1907"  # Belirlediğin güncel şifre
 
 st.set_page_config(
     page_title="FBÜ SKS | Spor Malzemeleri ve Zimmet Portalı", 
